@@ -1,0 +1,87 @@
+<div *ngIf="isLoading" class="spinner-wrapper">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+<div *ngIf="!isLoading" class="card mt-3">
+  <div class="card-header">
+    <h5>{{ content.title }}</h5>
+  </div>
+  <div class="card-body">
+    <p><strong>Description:</strong> {{ content.description }}</p>
+    <p><strong>Category:</strong> {{ content.category.name }}</p>
+    <p *ngIf="content.ratingsCount > 0">
+      <strong>Average rating:</strong>
+      {{ content.averageRating.toFixed(1) }} ★ ({{ content.ratingsCount }} ratings)
+    </p>
+
+    <p *ngIf="userRatingValue">
+      <strong>You rated:</strong> {{ userRatingValue }} ★
+    </p>
+
+    <p *ngIf="!userRatingValue">
+      <em>You haven’t rated this content yet.</em>
+    </p>
+
+
+    <div *ngIf="content.ratingsCount === 0">
+      <p><strong>Rating:</strong> No ratings yet.</p>
+    </div>
+    <button class="btn btn-secondary btn-sm me-2" (click)="goBack()">Back</button>
+    <a class="btn btn-sm btn-success me-2" [href]="environment.apiUrl + '/' + content.filePath" download>
+      Download
+    </a>
+    <button *ngIf="canDelete()" class="btn btn-danger btn-sm me-2"
+            (click)="deleteContent(content._id); $event.stopPropagation()">Delete
+    </button>
+    <button
+      *ngIf="canDelete()"
+      class="btn btn-secondary btn-sm"
+      [routerLink]="['/edit', content._id]">
+      Edit
+    </button>
+  </div>
+</div>
+
+<!-- Rating Form -->
+<form [formGroup]="ratingForm" (ngSubmit)="submitRating()" class="mt-3">
+  <label for="ratingSelect" class="form-label me-2">Rate this content:</label>
+  <select class="form-select w-auto d-inline-block" formControlName="rating" id="ratingSelect">
+    <option value="">Select</option>
+    <option *ngFor="let r of [1, 2, 3, 4, 5]" [value]="r">{{ r }}</option>
+  </select>
+  <button class="btn btn-sm btn-primary ms-2" type="submit" [disabled]="!ratingForm.valid">Submit</button>
+</form>
+
+<!-- Comment Form -->
+<form [formGroup]="commentForm" (ngSubmit)="submitComment()" class="mt-4">
+  <div class="mb-3">
+    <textarea formControlName="text" class="form-control" placeholder="Leave a comment..." rows="3"></textarea>
+  </div>
+  <button class="btn btn-primary btn-sm" type="submit" [disabled]="!commentForm.valid">Post Comment</button>
+</form>
+
+
+<!-- Comments -->
+<div class="mt-4">
+  <h6>Comments:</h6>
+  <div *ngFor="let comment of comments" class="border-bottom py-2">
+    <strong>{{ comment.user.firstname }} {{ comment.user.lastname }}</strong>
+    <span class="text-muted small ms-2">{{ comment.createdAt | date:'short' }}</span>
+    <p class="mb-1">{{ comment.moderated ? '[Comment is removed by admin]' : comment.text }}</p>
+    <div class="d-flex align-items-center mt-2">
+      <button
+        *ngIf="this.userRole === 'admin' || this.userId === comment.user._id"
+        class="btn btn-sm btn-danger me-2"
+        (click)="deleteComment(comment._id)"
+      >
+        Delete
+      </button>
+
+      <button *ngIf="this.userRole === 'admin'" class="btn btn-sm btn-outline-secondary"
+              (click)="moderateComment(comment._id)">
+        {{ comment.moderated ? 'Unmoderate' : 'Moderate' }}
+      </button>
+    </div>
+  </div>
+</div>

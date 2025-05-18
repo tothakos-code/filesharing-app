@@ -1,0 +1,14 @@
+<div class="card mb-4">
+  <h5 class="card-header">User Profile</h5>
+  <div class="card-body">
+    <h5 class="card-title">{{ firstName }} {{ lastName }}</h5>
+    <p class="card-text">
+      <strong>Email:</strong> {{ email }}<br />
+      <strong>Role:</strong> {{ role | titlecase }}<br />
+    </p>
+
+    <button class="btn btn-outline-primary" (click)="goBack()">Back</button>
+  </div>
+</div>
+
+<change-password></change-password>
